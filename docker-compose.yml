@@ -1,0 +1,18 @@
+# Use postgres/example user/password credentials
+
+services:
+  db:
+    image: postgres
+    ports:
+      - "5433:5432"  # меняем внешний порт на 5433
+    environment:
+      POSTGRES_DB: pomodoro
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+
+  cache:
+    image: redis:7.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+
