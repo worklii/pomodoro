@@ -1,4 +1,6 @@
 from sqlalchemy.orm import Session
+
+from schema import TaskCreateSchema
 from schema.task import TaskSchema
 from models import Tasks
 from sqlalchemy import select, delete, update
@@ -19,16 +21,22 @@ class TaskRepository:
             ).scalar_one_or_none()
         return task
 
-    def create_task(self, task: TaskSchema) -> int:
+    def get_user_task(self, task_id: int, user_id: int) -> Tasks | None:
+        query = select(Tasks).where(Tasks.id == task_id, Tasks.user_id == user_id)
         with self.session() as session:
-            task_model: Tasks = Tasks(name=task.name, pomodoro_count=task.pomodoro_count, category_id=task.category_id)
+            task: Tasks = session.execute(query).scalar_one_or_none()
+        return task
+
+    def create_task(self, task: TaskCreateSchema, user_id: int) -> int:
+        with self.session() as session:
+            task_model: Tasks = Tasks(name=task.name, pomodoro_count=task.pomodoro_count, category_id=task.category_id, user_id=user_id)
             session.add(task_model)
             session.commit()
             return task_model.id
 
-    def delete_task(self, task_id: int):
+    def delete_task(self, task_id: int, user_id: int) -> None:
         with self.session() as session:
-            session.execute(delete(Tasks).where(Tasks.id == task_id))
+            session.execute(delete(Tasks).where(Tasks.id == task_id, Tasks.user_id == user_id))
             session.commit()
 
     def update_task_name(self, task_id: int, name: str):
@@ -36,6 +44,7 @@ class TaskRepository:
         with self.session() as session:
             task_id : int = session.execute(query).scalar_one_or_none()
             session.commit()  # вот здесь важный вызов!
+            session.flush()
             return self.get_task(task_id)
 
 

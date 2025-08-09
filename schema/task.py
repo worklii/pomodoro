@@ -6,8 +6,9 @@ class TaskSchema(BaseModel):
     id: int | None = None
     name: str | None = None
     pomodoro_count: int | None = None
+    category_id: int
+    user_id: int
 
-    category_id: Optional[int] = Field(default=None)
     class Config:
         from_attributes = True
 
@@ -16,3 +17,8 @@ class TaskSchema(BaseModel):
         if self.pomodoro_count is None and self.name is None:
             raise ValueError('pomodoro_count or name are required')
         return self
+
+class TaskCreateSchema(BaseModel):
+    name: str | None = None
+    pomodoro_count: int | None = None
+    category_id: int
